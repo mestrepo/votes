@@ -1,4 +1,4 @@
-import { Teams } from './teams'
+import { Teams, Members } from './collections'
 
 const resolvers = {
   Query: {
@@ -7,7 +7,10 @@ const resolvers = {
     }
   },
   Mutation: {
-    
+    joinTeam(_, args) {
+      let team = Teams.findOne({ number: args.teamNumber })
+      return Members.insert({ teamNumber: args.teamNumber, phoneNumber: args.phoneNumber })
+    }
   },
   Team: {
     

@@ -5,13 +5,18 @@ const typeDefs = gql`
     getTeams: [Team] 
   }
   type Mutation {
-    joinTeam(phoneNumber: String!): Boolean
+    joinTeam(phoneNumber: String!, teamNumber: Int!): String
     vote(teamNumber: Int!): Boolean
   }
   type Team {
     _id: String
     number: Int 
     votes: Int
+  }
+  type Member {
+    _id: String
+    teamNumber: Int
+    phoneNumber: String
   }
 `
 

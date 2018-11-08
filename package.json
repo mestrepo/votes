@@ -10,6 +10,7 @@
   "dependencies": {
     "@babel/runtime": "^7.0.0",
     "apollo-server-express": "^2.2.0",
+    "graphql": "^14.0.2",
     "meteor-node-stubs": "^0.4.1"
   },
   "meteor": {

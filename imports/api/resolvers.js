@@ -1,9 +1,9 @@
-import { Teams } from './tasks'
+import { Teams } from './teams'
 
 const resolvers = {
   Query: {
     getTeams() {
-      return Teams.findAll() 
+      return Teams.find({}).fetch()
     }
   },
   Mutation: {

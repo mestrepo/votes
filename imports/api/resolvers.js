@@ -2,6 +2,13 @@ import { Teams, Members, VotedMembers } from './collections'
 
 const resolvers = {
   Query: {
+    initiate() {
+      return [
+        'Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team',
+        'Response',
+        'xxx'
+      ]
+    },
     getTeams() {
       return Teams.find({}).fetch()
     }

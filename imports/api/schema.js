@@ -2,6 +2,16 @@ import { gql } from 'apollo-server-express'
 
 const typeDefs = gql`
   type Query {
+    initiate(
+      Sequence: Int,
+      Mobile: String,
+      SessionId: String,
+      ServiceCode: String,
+      Operator: String,
+      Message: String,
+      ClientState: Boolean,
+      Type: String,
+    ): [String]
     getTeams: [Team] 
   }
   type Mutation {

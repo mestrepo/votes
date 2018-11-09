@@ -6,7 +6,7 @@ const typeDefs = gql`
   }
   type Mutation {
     joinTeam(phoneNumber: String!, teamNumber: Int!): String
-    vote(teamNumber: Int!): Boolean
+    vote(phoneNumber: String!, teamNumber: Int!): String
   }
   type Team {
     _id: String

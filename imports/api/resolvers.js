@@ -9,7 +9,9 @@ const resolvers = {
   Mutation: {
     joinTeam(_, args) {
       let team = Teams.findOne({ number: args.teamNumber })
-      return Members.insert({ teamNumber: args.teamNumber, phoneNumber: args.phoneNumber })
+      if (!Members.findOne({ phoneNumber: args.phoneNumber }))
+        return Members.insert({ teamNumber: args.teamNumber, phoneNumber: args.phoneNumber })
+      return 'You have already joined a team.'
     },
     vote(_, args) {
       let team = Teams.findOne({ number: args.teamNumber })

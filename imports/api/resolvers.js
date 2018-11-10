@@ -1,8 +1,27 @@
-import { Teams, Members, VotedMembers } from './collections'
+import { Teams, Members, VotedMembers, Sessions } from './collections'
 
 const resolvers = {
   Query: {
-    initiate() {
+    initiate(_, args) {
+      /*
+        Attempt getting session
+        If session doesn't exist, create a record
+        Fields:
+          phoneNumber, sessionId, sequence,
+          operator, dateCreated
+      */
+      let session
+      session = Sessions.findOne({ sessionId: args.sessionId })
+      if (!session) {
+        session = Sessions.insert({
+          phoneNumber: args.phoneNumber,
+          sessionId: args.sessionId,
+          sequence: args.sequence,
+          operator: args.operator,
+          dateCreated: new Date()
+        })
+      }
+
       return [
         'Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team',
         'Response',

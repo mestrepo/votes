@@ -3,14 +3,14 @@ import { gql } from 'apollo-server-express'
 const typeDefs = gql`
   type Query {
     initiate(
-      Sequence: Int,
-      Mobile: String,
-      SessionId: String,
-      ServiceCode: String,
-      Operator: String,
-      Message: String,
-      ClientState: Boolean,
-      Type: String,
+      sequence: Int,
+      phoneNumber: String,
+      sessionId: String,
+      serviceCode: String,
+      operator: String,
+      message: String,
+      clientState: Boolean,
+      type: String,
     ): [String]
     getTeams: [Team] 
   }

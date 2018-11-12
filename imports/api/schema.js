@@ -9,7 +9,7 @@ const typeDefs = gql`
       serviceCode: String,
       operator: String,
       message: String,
-      clientState: Boolean,
+      clientState: String,
       type: String,
     ): [String]
     getTeams: [Team] 

@@ -71,20 +71,23 @@ const resolvers = {
             sequence: args.sequence, message: args.message
           })
 
-          if (session.menuOption === 1) {
-            let teamNumber = parseInt(args.message)
-            const team = Teams.findOne({ number: teamNumber })
-            if (!team)
-              return USSDRelease(`Error. Team ${teamNumber} does not exist.`)
+          const member = Members.findOne({ phoneNumber: args.phoneNumber })
+          const teamNumber = parseInt(args.message)
+          const team = Teams.findOne({ number: teamNumber })
 
-            const member = Members.findOne({ phoneNumber: args.phoneNumber })
+          if (!team)
+            return USSDRelease(`Error. Team ${teamNumber} does not exist.`)
+
+          if (session.menuOption === 1) {
             if (!member) {
+              // Add member to team
               Members.insert({
                 teamNumber: teamNumber,
                 phoneNumber: args.phoneNumber
               })
               return USSDRelease(`Success! You just joined Team ${teamNumber}.`)
             } else {
+              // Change member's team
               Members.update(
                 { _id: member._id },
                 { $set: { teamNumber: teamNumber }}
@@ -93,8 +96,23 @@ const resolvers = {
             }
           }
 
-          if (session.menuOption === 2)
-            return USSDRelease(`Success! You voted for Team ${args.message}.`)
+          if (session.menuOption === 2) {
+            // Make sure a member cannot vote for their team
+            if (member.teamNumber === team.number)
+              return USSDRelease('You cannot vote for your team.')
+
+            // Make sure a member cannot vote twice
+            const votedMember = VotedMembers.findOne({ phoneNumber: args.phoneNumber })
+            if (votedMember)
+              return USSDRelease('You cannot vote more than once.')
+
+            Teams.update(
+              { number: teamNumber },
+              { $inc: { votes: 1 } }
+            )
+            VotedMembers.insert({ phoneNumber: args.phoneNumber })
+            return USSDRelease(`Success! You just voted for Team ${teamNumber}.`)
+          }
         }
       }
     },

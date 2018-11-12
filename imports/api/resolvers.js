@@ -8,6 +8,14 @@ const updateSession = (key, params) => {
   )
 }
 
+const USSDResponse = (string) => {
+  return [string, "Response", "xxx"]
+}
+
+const USSDRelease = (string) => {
+  return [string, "Release", "xxx"]
+}
+
 const resolvers = {
   Query: {
     initiate(_, args) {
@@ -31,11 +39,8 @@ const resolvers = {
           dateCreated: new Date()
         })
 
-        return [
-          'Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team',
-          'Response',
-          'xxx'
-        ]
+        return USSDResponse('Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team')
+
       } else {
         // If existing session's message is USSDCode string,
         // and current request sequence is 2
@@ -52,22 +57,12 @@ const resolvers = {
           // Case 1 - previous message is USSD code string
           if (session.message === USSDCode) {
             // Menu item 1
-            if (args.message === '1') {
-              return [
-                'Enter team number',
-                'Response',
-                'xxx'
-              ]
-            }
+            if (args.message === '1')
+              return USSDResponse('Enter team number')
 
             // Menu item 2
-            if (args.message == '2') {
-              return [
-                'Enter team number',
-                'Response',
-                'xxx'
-              ]
-            }
+            if (args.message == '2')
+              return USSDResponse('Enter team number')
           }
         }
 
@@ -79,42 +74,27 @@ const resolvers = {
           if (session.menuOption === 1) {
             let teamNumber = parseInt(args.message)
             const team = Teams.findOne({ number: teamNumber })
-            if (!team) {
-              return [
-                `Error. Team ${teamNumber} does not exist.`,
-                'Release',
-                'xxx'
-              ]
-            }
+            if (!team)
+              return USSDRelease(`Error. Team ${teamNumber} does not exist.`)
 
             const member = Members.findOne({ phoneNumber: args.phoneNumber })
             if (!member) {
-              Members.insert({ teamNumber: teamNumber, phoneNumber: args.phoneNumber })
-              return [
-                `Success! You just joined Team ${teamNumber}.`,
-                'Release',
-                'xxx'
-              ]
+              Members.insert({
+                teamNumber: teamNumber,
+                phoneNumber: args.phoneNumber
+              })
+              return USSDRelease(`Success! You just joined Team ${teamNumber}.`)
             } else {
               Members.update(
                 { _id: member._id },
                 { $set: { teamNumber: teamNumber }}
               )
-              return [
-                `Success! You just changed your team. You are now in Team ${teamNumber}.`,
-                'Release',
-                'xxx'
-              ]
+              return USSDRelease(`Success! You just changed your team. You are now in Team ${teamNumber}.`)
             }
           }
 
-          if (session.menuOption === 2) {
-            return [
-              `You voted for Team ${args.message}.`,
-              'Release',
-              'xxx'
-            ]
-          }
+          if (session.menuOption === 2)
+            return USSDRelease(`Success! You voted for Team ${args.message}.`)
         }
       }
     },

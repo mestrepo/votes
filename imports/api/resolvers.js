@@ -55,102 +55,6 @@ const resolvers = {
         'Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team',
         ''
       )
-
-      /*
-        Attempt getting session
-        If session doesn't exist, create a record
-        Fields:
-          phoneNumber, sessionId, sequence,
-          operator, dateCreated, message
-      */
-      /* let session = Sessions.findOne({ sessionId: args.sessionId, phoneNumber: args.phoneNumber })
-      console.log(`Found session: ${session}`)
-      if (!session) {
-        session = Sessions.insert({
-          phoneNumber: args.phoneNumber,
-          sessionId: args.sessionId,
-          sequence: args.sequence,
-          operator: args.operator,
-          message: args.message,
-          dateCreated: new Date()
-        })
-
-        return USSDResponse('Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team')
-
-      } else {
-        // If existing session's message is USSDCode string,
-        // and current request sequence is 2
-        // we can handle each menu item.
-        console.log(`Sequence: ${args.sequence}, Previous message: ${session.message}, Incoming message: ${args.message}`)
-
-        if (args.sequence === 2) {
-          updateSession(args.sessionId, {
-            sequence: args.sequence,
-            message: args.message,
-            menuOption: parseInt(args.message)
-          })
-
-          // Case 1 - previous message is USSD code string
-          if (session.message === USSDCode) {
-            // Menu item 1
-            if (args.message === '1')
-              return USSDResponse('Enter team number')
-
-            // Menu item 2
-            if (args.message == '2')
-              return USSDResponse('Enter team number')
-          }
-        }
-
-        if (args.sequence === 3) {
-          updateSession(args.sessionId, {
-            sequence: args.sequence, message: args.message
-          })
-
-          const member = Members.findOne({ phoneNumber: args.phoneNumber })
-          const teamNumber = parseInt(args.message)
-          const team = Teams.findOne({ number: teamNumber })
-
-          if (!team)
-            return USSDRelease(`Error. Team ${teamNumber} does not exist.`)
-
-          if (session.menuOption === 1) {
-            if (!member) {
-              // Add member to team
-              Members.insert({
-                teamNumber: teamNumber,
-                phoneNumber: args.phoneNumber
-              })
-              return USSDRelease(`Success! You just joined Team ${teamNumber}.`)
-            } else {
-              // Change member's team
-              Members.update(
-                { _id: member._id },
-                { $set: { teamNumber: teamNumber }}
-              )
-              return USSDRelease(`Success! You just changed your team. You are now in Team ${teamNumber}.`)
-            }
-          }
-
-          if (session.menuOption === 2) {
-            // Make sure a member cannot vote for their team
-            if (member.teamNumber === team.number)
-              return USSDRelease('You cannot vote for your team.')
-
-            // Make sure a member cannot vote twice
-            const votedMember = VotedMembers.findOne({ phoneNumber: args.phoneNumber })
-            if (votedMember)
-              return USSDRelease('You cannot vote more than once.')
-
-            Teams.update(
-              { number: teamNumber },
-              { $inc: { votes: 1 } }
-            )
-            VotedMembers.insert({ phoneNumber: args.phoneNumber })
-            return USSDRelease(`Success! You just voted for Team ${teamNumber}.`)
-          }
-        }
-      } */
     },
     getTeams() {
       return Teams.find({}).fetch()
@@ -160,37 +64,79 @@ const resolvers = {
     joinTeam(_, args) {
       console.log(args)
 
+      const message = args.message
       const session = getAndUpdateSession(args.sessionId, args.sequence, args.message)
 
-      // Validate input
-      if (session.message === USSDCode) {
-        if (parseInt(args.message) > 2)
+      if (args.sequence === 2) {
+        // Validate current message
+        if (message !== '1')
           return USSDRelease('Invalid option.')
+
+        // Return response.
+        // We are sending current message to Hubtel as ClientState
+        // we will use this as menu option for subsequent requests.
+        return USSDResponse('Enter team number', message)
       }
 
-      // Return response, plus menuOption
-      if (args.message === '1')
-        return USSDResponse('Enter team number', args.message)
+      // Join team
+      if (args.sequence === 3) {
+        updateSession(args.sessionId, {
+          sequence: args.sequence, message: args.message
+        })
+
+        const member = Members.findOne({ phoneNumber: args.phoneNumber })
+        const teamNumber = parseInt(args.message)
+        const team = Teams.findOne({ number: teamNumber })
+
+        if (!team)
+          return USSDRelease(`Error. Team ${teamNumber} does not exist.`)
+
+        // If member doesn't exist, add member to team
+        if (!member) {
+          Members.insert({
+            teamNumber: teamNumber,
+            phoneNumber: args.phoneNumber
+          })
+          return USSDRelease(`Success! You just joined Team ${teamNumber}.`)
+        }
+
+        // Else, change member's team
+        Members.update(
+          { _id: member._id },
+          { $set: { teamNumber: teamNumber }}
+        )
+        return USSDRelease(`Success! You just changed your team. You are now in Team ${teamNumber}.`)
+      }
     },
     vote(_, args) {
-      let team = Teams.findOne({ number: args.teamNumber })
-      let member = Members.findOne({ phoneNumber: args.phoneNumber })
+      console.log(args)
 
-      // Make sure a member cannot vote for their team
-      if (member.teamNumber === team.number)
-        return 'You cannot vote for your team'
+      const message = args.message
+      const session = getAndUpdateSession(args.sessionId, args.sequence, args.message)
+      if (args.sequence === 2)
+        return USSDResponse('Enter team number', message)
 
-      // Make sure a member cannot vote twice
-      let votedMember = VotedMembers.findOne({ phoneNumber: args.phoneNumber })
-      if (votedMember)
-        return 'You cannot vote more than once'
+      if (args.sequence === 3) {
+        const member = Members.findOne({ phoneNumber: args.phoneNumber })
+        const teamNumber = parseInt(args.message)
+        const team = Teams.findOne({ number: teamNumber })
 
-      Teams.update(
-        { number: args.teamNumber },
-        { $inc: { votes: 1 } }
-      )
-      VotedMembers.insert({ phoneNumber: args.phoneNumber })
-      return 'Success'
+        // Make sure a member cannot vote for their team
+        if (member.teamNumber === team.number)
+          return USSDRelease('You cannot vote for your team.')
+
+        // Make sure a member cannot vote twice
+        const votedMember = VotedMembers.findOne({ phoneNumber: args.phoneNumber })
+        if (votedMember)
+          return USSDRelease('You cannot vote more than once.')
+
+        Teams.update(
+          { number: teamNumber },
+          { $inc: { votes: 1 } }
+        )
+        VotedMembers.insert({ phoneNumber: args.phoneNumber })
+        return USSDRelease(`Success! You just voted for Team ${teamNumber}.`)
+      }
     }
   },
 }

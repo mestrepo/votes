@@ -8,18 +8,54 @@ const updateSession = (key, params) => {
   )
 }
 
-const USSDResponse = (string) => {
-  return [string, "Response", "xxx"]
+const USSDResponse = (string, clientState) => {
+  return [string, "Response", clientState]
 }
 
 const USSDRelease = (string) => {
-  return [string, "Release", "xxx"]
+  return [string, "Release"]
+}
+
+const getAndUpdateSession = (sessionId, sequence, message) => {
+  // Get session
+  const session = Sessions.findOne({ sessionId: sessionId })
+
+  // Set menuOption in session if it hasn't already been set
+  if (!session.menuOption) {
+    updateSession(sessionId, {
+      menuOption: parseInt(message)
+    })
+  }
+
+  // Update session
+  updateSession(sessionId, {
+    sequence: sequence,
+    message: message,
+  })
+
+  return session
 }
 
 const resolvers = {
   Query: {
     initiate(_, args) {
       console.log(args)
+
+      // New sessions always start here
+      const session = Sessions.insert({
+        phoneNumber: args.phoneNumber,
+        sessionId: args.sessionId,
+        sequence: args.sequence,
+        operator: args.operator,
+        message: args.message,
+        dateCreated: new Date()
+      })
+
+      return USSDResponse(
+        'Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team',
+        ''
+      )
+
       /*
         Attempt getting session
         If session doesn't exist, create a record
@@ -27,7 +63,7 @@ const resolvers = {
           phoneNumber, sessionId, sequence,
           operator, dateCreated, message
       */
-      let session = Sessions.findOne({ sessionId: args.sessionId, phoneNumber: args.phoneNumber })
+      /* let session = Sessions.findOne({ sessionId: args.sessionId, phoneNumber: args.phoneNumber })
       console.log(`Found session: ${session}`)
       if (!session) {
         session = Sessions.insert({
@@ -114,7 +150,7 @@ const resolvers = {
             return USSDRelease(`Success! You just voted for Team ${teamNumber}.`)
           }
         }
-      }
+      } */
     },
     getTeams() {
       return Teams.find({}).fetch()
@@ -122,10 +158,19 @@ const resolvers = {
   },
   Mutation: {
     joinTeam(_, args) {
-      let team = Teams.findOne({ number: args.teamNumber })
-      if (!Members.findOne({ phoneNumber: args.phoneNumber }))
-        return Members.insert({ teamNumber: args.teamNumber, phoneNumber: args.phoneNumber })
-      return 'You have already joined a team.'
+      console.log(args)
+
+      const session = getAndUpdateSession(args.sessionId, args.sequence, args.message)
+
+      // Validate input
+      if (session.message === USSDCode) {
+        if (parseInt(args.message) > 2)
+          return USSDRelease('Invalid option.')
+      }
+
+      // Return response, plus menuOption
+      if (args.message === '1')
+        return USSDResponse('Enter team number', args.message)
     },
     vote(_, args) {
       let team = Teams.findOne({ number: args.teamNumber })

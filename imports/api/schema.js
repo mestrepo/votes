@@ -15,8 +15,26 @@ const typeDefs = gql`
     getTeams: [Team] 
   }
   type Mutation {
-    joinTeam(phoneNumber: String!, teamNumber: Int!): String
-    vote(phoneNumber: String!, teamNumber: Int!): String
+    joinTeam(
+      sequence: Int,
+      phoneNumber: String,
+      sessionId: String,
+      serviceCode: String,
+      operator: String,
+      message: String,
+      clientState: String,
+      type: String,
+    ): [String]
+    vote(
+      sequence: Int,
+      phoneNumber: String,
+      sessionId: String,
+      serviceCode: String,
+      operator: String,
+      message: String,
+      clientState: String,
+      type: String,
+    ): [String]
   }
   type Team {
     _id: String

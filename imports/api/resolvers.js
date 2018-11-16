@@ -134,7 +134,7 @@ const resolvers = {
           { number: teamNumber },
           { $inc: { votes: 1 } }
         )
-        VotedMembers.insert({ phoneNumber: args.phoneNumber })
+        VotedMembers.insert({ phoneNumber: args.phoneNumber, teamNumber: teamNumber })
         return USSDRelease(`Success! You just voted for Team ${teamNumber}.`)
       }
     }

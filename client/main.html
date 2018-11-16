@@ -3,23 +3,18 @@
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
+  <h1>Welcome to The Kitchen App Challenge!</h1>
 
-  {{> hello}}
   {{> info}}
 </body>
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
-</template>
-
 <template name="info">
-  <h2>Learn Meteor!</h2>
+  <p>Team Count: {{ teamCount }}</p>
+  <p>Member Count: {{ memberCount }}</p>
+  <p>Votes</p>
   <ul>
-    <li><a href="https://www.meteor.com/try" target="_blank">Do the Tutorial</a></li>
-    <li><a href="http://guide.meteor.com" target="_blank">Follow the Guide</a></li>
-    <li><a href="https://docs.meteor.com" target="_blank">Read the Docs</a></li>
-    <li><a href="https://forums.meteor.com" target="_blank">Discussions</a></li>
+    {{#each teams}}
+      <li>Team {{ number }}: {{#if votes}} {{ votes }} {{ else }} 0 {{/if}}</li>
+    {{/each}}
   </ul>
 </template>

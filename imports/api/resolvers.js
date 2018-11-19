@@ -113,6 +113,12 @@ const resolvers = {
 
       const message = args.message
       const session = getAndUpdateSession(args.sessionId, args.sequence, args.message)
+      
+      // Check whether member exists
+      const member = Members.findOne({ teamNumber: args.phoneNumber })
+      if (!member)
+        return USSDRelease('You need to join a team first.')
+
       if (args.sequence === 2)
         return USSDResponse('Enter team number', message)
 

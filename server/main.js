@@ -1,7 +1,7 @@
 import { WebApp } from 'meteor/webapp'
 import { getUser } from 'meteor/apollo'
 
-import { ApolloServer, gql } from 'apollo-server-express'
+import { ApolloServer } from 'apollo-server-express'
 
 import typeDefs from '../imports/api/schema'
 import resolvers from '../imports/api/resolvers'

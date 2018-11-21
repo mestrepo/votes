@@ -1,20 +1,9 @@
 import { Teams, Members, VotedMembers, Sessions } from './collections'
 import { USSDCode } from '../config'
 
-const updateSession = (key, params) => {
-  Sessions.update(
-    {sessionId: key},
-    {$set: params}
-  )
-}
-
-const USSDResponse = (string, clientState) => {
-  return [string, "Response", clientState]
-}
-
-const USSDRelease = (string) => {
-  return [string, "Release"]
-}
+const USSDRelease = string => [string, "Release"]
+const USSDResponse = (string, clientState) => [string, "Response", clientState]
+const updateSession = (key, params) => Sessions.update({sessionId: key}, {$set: params})
 
 const getAndUpdateSession = (sessionId, sequence, message) => {
   // Get session
@@ -22,16 +11,11 @@ const getAndUpdateSession = (sessionId, sequence, message) => {
 
   // Set menuOption in session if it hasn't already been set
   if (!session.menuOption) {
-    updateSession(sessionId, {
-      menuOption: parseInt(message)
-    })
+    updateSession(sessionId, { menuOption: parseInt(message) })
   }
 
   // Update session
-  updateSession(sessionId, {
-    sequence: sequence,
-    message: message,
-  })
+  updateSession(sessionId, { sequence: sequence, message: message })
 
   return session
 }

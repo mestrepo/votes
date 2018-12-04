@@ -1,55 +1,31 @@
-import {
-  Teams,
-  Members,
-  VotedMembers,
-  Sessions } from './collections'
+import { Meteor } from 'meteor/meteor'
+import { Sessions } from './sessions'
 import { USSDCode } from '../config'
-
-const USSDRelease = string =>
-  [string, "Release"]
-
-const USSDResponse = (string, clientState) =>
-  [string, "Response", clientState]
-
-const updateSession = (key, params) =>
-  Sessions.update({sessionId: key}, {$set: params})
-
-const getAndUpdateSession = (
-  sessionId, sequence, message) => {
-  // Get session
-  const session = Sessions.findOne({
-    sessionId: sessionId
-  })
-
-  // Set menuOption in session if it hasn't already been set
-  if (!session.menuOption) {
-    updateSession(sessionId, {
-      menuOption: parseInt(message)
-    })
-  }
-
-  // Update session
-  updateSession(sessionId, {
-    sequence: sequence, message: message
-  })
-
-  return session
-}
+import {
+  Teams, Members, VotedMembers
+} from './collections'
+import {
+  USSDRelease, USSDResponse,
+  updateSession, getAndUpdateSession
+} from './helpers'
 
 const resolvers = {
   Query: {
     initiate(_, args) {
       console.log(args)
-
       // New sessions always start here
-      const session = Sessions.insert({
-        phoneNumber: args.phoneNumber,
-        sessionId: args.sessionId,
-        sequence: args.sequence,
-        operator: args.operator,
-        message: args.message,
-        dateCreated: new Date()
-      })
+
+      // Delete key/value pairs we don't need
+      delete args.type
+      delete args.clientState
+      delete args.serviceCode
+
+      // Add date and time
+      const session = Object.assign(
+        args, {dateCreated: new Date()})
+
+      // Insert session object
+      Sessions.insert(session)
 
       return USSDResponse(
         `Welcome to the Kitchen App Challenge

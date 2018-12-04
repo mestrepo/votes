@@ -1,21 +1,37 @@
-import { Teams, Members, VotedMembers, Sessions } from './collections'
+import {
+  Teams,
+  Members,
+  VotedMembers,
+  Sessions } from './collections'
 import { USSDCode } from '../config'
 
-const USSDRelease = string => [string, "Release"]
-const USSDResponse = (string, clientState) => [string, "Response", clientState]
-const updateSession = (key, params) => Sessions.update({sessionId: key}, {$set: params})
+const USSDRelease = string =>
+  [string, "Release"]
 
-const getAndUpdateSession = (sessionId, sequence, message) => {
+const USSDResponse = (string, clientState) =>
+  [string, "Response", clientState]
+
+const updateSession = (key, params) =>
+  Sessions.update({sessionId: key}, {$set: params})
+
+const getAndUpdateSession = (
+  sessionId, sequence, message) => {
   // Get session
-  const session = Sessions.findOne({ sessionId: sessionId })
+  const session = Sessions.findOne({
+    sessionId: sessionId
+  })
 
   // Set menuOption in session if it hasn't already been set
   if (!session.menuOption) {
-    updateSession(sessionId, { menuOption: parseInt(message) })
+    updateSession(sessionId, {
+      menuOption: parseInt(message)
+    })
   }
 
   // Update session
-  updateSession(sessionId, { sequence: sequence, message: message })
+  updateSession(sessionId, {
+    sequence: sequence, message: message
+  })
 
   return session
 }
@@ -36,7 +52,8 @@ const resolvers = {
       })
 
       return USSDResponse(
-        'Welcome to the Kitchen App Challenge\n\n1. Join a team\n2. Vote for a team',
+        `Welcome to the Kitchen App Challenge
+        \n1. Join a team\n2. Vote for a team`,
         ''
       )
     },
@@ -49,7 +66,8 @@ const resolvers = {
       console.log(args)
 
       const message = args.message
-      const session = getAndUpdateSession(args.sessionId, args.sequence, args.message)
+      const session = getAndUpdateSession(
+        args.sessionId, args.sequence, args.message)
 
       if (args.sequence === 2) {
         // Validate current message
@@ -73,7 +91,10 @@ const resolvers = {
         const team = Teams.findOne({ number: teamNumber })
 
         if (!team)
-          return USSDRelease(`Error. Team ${teamNumber} does not exist.`)
+          return USSDRelease(`Sorry. Team ${teamNumber} does not exist.`)
+
+        if (member.teamNumber === teamNumber)
+          return USSDRelease(`You are already in Team ${teamNumber}.`)
 
         // If member doesn't exist, add member to team
         if (!member) {
@@ -89,17 +110,22 @@ const resolvers = {
           { _id: member._id },
           { $set: { teamNumber: teamNumber }}
         )
-        return USSDRelease(`Success! You just changed your team. You are now in Team ${teamNumber}.`)
+        return USSDRelease(
+          `Success! You just changed your team. You are now in Team ${teamNumber}.`
+        )
       }
     },
     vote(_, args) {
       console.log(args)
 
       const message = args.message
-      const session = getAndUpdateSession(args.sessionId, args.sequence, args.message)
+      const session = getAndUpdateSession(
+        args.sessionId, args.sequence, args.message)
       
       // Check whether member exists
-      const member = Members.findOne({ teamNumber: args.phoneNumber })
+      const member = Members.findOne({
+        phoneNumber: args.phoneNumber
+      })
       if (!member)
         return USSDRelease('You need to join a team first.')
 
@@ -107,7 +133,9 @@ const resolvers = {
         return USSDResponse('Enter team number', message)
 
       if (args.sequence === 3) {
-        const member = Members.findOne({ phoneNumber: args.phoneNumber })
+        const member = Members.findOne({
+          phoneNumber: args.phoneNumber
+        })
         const teamNumber = parseInt(args.message)
         const team = Teams.findOne({ number: teamNumber })
 
@@ -116,7 +144,9 @@ const resolvers = {
           return USSDRelease('You cannot vote for your team.')
 
         // Make sure a member cannot vote twice
-        const votedMember = VotedMembers.findOne({ phoneNumber: args.phoneNumber })
+        const votedMember = VotedMembers.findOne({
+          phoneNumber: args.phoneNumber
+        })
         if (votedMember)
           return USSDRelease('You cannot vote more than once.')
 
@@ -124,8 +154,11 @@ const resolvers = {
           { number: teamNumber },
           { $inc: { votes: 1 } }
         )
-        VotedMembers.insert({ phoneNumber: args.phoneNumber, teamNumber: teamNumber })
-        return USSDRelease(`Success! You just voted for Team ${teamNumber}.`)
+        VotedMembers.insert({
+          phoneNumber: args.phoneNumber, teamNumber: teamNumber
+        })
+        return USSDRelease(
+          `Success! You just voted for Team ${teamNumber}.`)
       }
     }
   },

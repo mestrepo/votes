@@ -29,7 +29,7 @@ const resolvers = {
 
       return USSDResponse(
         `Welcome to the Kitchen App Challenge
-        \n1. Join a team\n2. Vote for a team`,
+        \n1. Vote for a team`,
         ''
       )
     },
@@ -38,59 +38,6 @@ const resolvers = {
     }
   },
   Mutation: {
-    joinTeam(_, args) {
-      console.log(args)
-
-      const message = args.message
-      const session = getAndUpdateSession(
-        args.sessionId, args.sequence, args.message)
-
-      if (args.sequence === 2) {
-        // Validate current message
-        if (message !== '1')
-          return USSDRelease('Invalid option.')
-
-        // Return response.
-        // We are sending current message to Hubtel as ClientState
-        // we will use this as menu option for subsequent requests.
-        return USSDResponse('Enter team number', message)
-      }
-
-      // Join team
-      if (args.sequence === 3) {
-        updateSession(args.sessionId, {
-          sequence: args.sequence, message: args.message
-        })
-
-        const member = Members.findOne({ phoneNumber: args.phoneNumber })
-        const teamNumber = parseInt(args.message)
-        const team = Teams.findOne({ number: teamNumber })
-
-        if (!team)
-          return USSDRelease(`Sorry. Team ${teamNumber} does not exist.`)
-
-        if (member.teamNumber === teamNumber)
-          return USSDRelease(`You are already in Team ${teamNumber}.`)
-
-        // If member doesn't exist, add member to team
-        if (!member) {
-          Members.insert({
-            teamNumber: teamNumber,
-            phoneNumber: args.phoneNumber
-          })
-          return USSDRelease(`Success! You just joined Team ${teamNumber}.`)
-        }
-
-        // Else, change member's team
-        Members.update(
-          { _id: member._id },
-          { $set: { teamNumber: teamNumber }}
-        )
-        return USSDRelease(
-          `Success! You just changed your team. You are now in Team ${teamNumber}.`
-        )
-      }
-    },
     vote(_, args) {
       console.log(args)
 

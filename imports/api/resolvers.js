@@ -1,9 +1,7 @@
 import { Meteor } from 'meteor/meteor'
 import { Sessions } from './sessions'
 import { USSDCode } from '../config'
-import {
-  Teams, Members, VotedMembers
-} from './collections'
+import { Teams, Voted } from './collections'
 import {
   USSDRelease, USSDResponse,
   updateSession, getAndUpdateSession
@@ -44,40 +42,26 @@ const resolvers = {
       const message = args.message
       const session = getAndUpdateSession(
         args.sessionId, args.sequence, args.message)
-      
-      // Check whether member exists
-      const member = Members.findOne({
-        phoneNumber: args.phoneNumber
-      })
-      if (!member)
-        return USSDRelease('You need to join a team first.')
 
       if (args.sequence === 2)
         return USSDResponse('Enter team number', message)
 
       if (args.sequence === 3) {
-        const member = Members.findOne({
-          phoneNumber: args.phoneNumber
-        })
         const teamNumber = parseInt(args.message)
         const team = Teams.findOne({ number: teamNumber })
 
-        // Make sure a member cannot vote for their team
-        if (member.teamNumber === team.number)
-          return USSDRelease('You cannot vote for your team.')
-
-        // Make sure a member cannot vote twice
-        const votedMember = VotedMembers.findOne({
+        // Make sure a voter cannot vote twice
+        const voted = Voted.findOne({
           phoneNumber: args.phoneNumber
         })
-        if (votedMember)
-          return USSDRelease('You cannot vote more than once.')
+        if (voted)
+          return USSDRelease('You already voted.')
 
         Teams.update(
           { number: teamNumber },
           { $inc: { votes: 1 } }
         )
-        VotedMembers.insert({
+        Voted.insert({
           phoneNumber: args.phoneNumber, teamNumber: teamNumber
         })
         return USSDRelease(

@@ -9,6 +9,11 @@ import {
 
 const resolvers = {
   Query: {
+    getTeams() {
+      return Teams.find({}).fetch()
+    }
+  },
+  Mutation: {
     initiate(_, args) {
       console.log(args)
       // New sessions always start here
@@ -31,11 +36,6 @@ const resolvers = {
         ''
       )
     },
-    getTeams() {
-      return Teams.find({}).fetch()
-    }
-  },
-  Mutation: {
     vote(_, args) {
       console.log(args)
 

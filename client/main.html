@@ -1,23 +1,76 @@
 <head>
-  <title>votes</title>
+  <title>MEST Kitchen App Challenge</title>
+  <!-- <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content=""> -->
+
+
+  <!-- Bootstrap core CSS -->
+  <!-- <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+
+  <!-- Custom fonts for this template -->
+  <!-- <link rel="stylesheet" href="vendor/simple-line-icons/css/simple-line-icons.css">
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet"> -->
+
+  <!-- Plugin CSS -->
+  <!-- <link rel="stylesheet" href="device-mockups/device-mockups.min.css"> -->
+
+  <!-- Custom styles for this template -->
+  <!-- <link href="css/style.css" rel="stylesheet"> -->
 </head>
 
 <body>
-  <h1>Welcome to The Kitchen App Challenge!</h1>
-
   {{> info}}
+  
+
+  <!-- Bootstrap core JavaScript -->
+  <!-- <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script> -->
+
+  <!-- Plugin JavaScript -->
+  <!-- <script src="vendor/jquery-easing/jquery.easing.min.js"></script> -->
+
 </body>
 
 <template name="info">
-  <p>Team Count: {{ teamCount }}</p>
-  <p>Member Count: {{ memberCount }}</p>
-  <p>Votes</p>
-  <ul>
-    {{#each teams}}
-      <li>Team {{ number }}: {{#if votes}} {{ votes }} {{ else }} 0 {{/if}}</li>
-    {{/each}}
-  </ul>
-  <div class="progress">
-    <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
-  </div>
+  <header class="masthead">
+    <div class="row h-100" style="max-width: 80vw; margin: auto;">
+      <div class="col-lg-8 my-auto">
+        <div class="heading">
+          Votes
+        </div>
+        <p>Total number of votes: {{ voteCount }}</p>
+        <p>Team 1</p>
+        <div class="progress bar">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p>Team 2</p>
+        <div class="progress bar">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p>Team 3</p>
+        <div class="progress bar">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+      <div class="col-lg-4 my-auto">
+        <div class="device-container">
+          <div class="device-mockup iphone6_plus portrait white">
+            <div class="device">
+              <div class="screen">
+                <!-- Demo image for screen mockup, you can put an image here, some HTML, an animation, video, or anything else! -->
+                <img src="img/demo-screen-1.jpg" class="img-fluid" alt="">
+              </div>
+              <div class="button">
+                <!-- You can hook the "home button" to some JavaScript events or just remove it -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
 </template>

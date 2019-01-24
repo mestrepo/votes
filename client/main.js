@@ -1,16 +1,18 @@
+import { Session } from 'meteor/session'
 import { Template } from 'meteor/templating'
-import { Teams, Members, VotedMembers } from '../imports/api/collections'
+import { Teams } from '../imports/api/collections'
 
 import './main.html'
 
 Template.info.helpers({
-  teamCount() {
-    return Teams.find().count()
+  voteCount() {
+    Meteor.call('votes.count', (err, result) => {
+      if (result) {
+        Session.set('voteCount', result[0].total)
+      } else {
+        console.log('Error getting vote count', err)
+      }
+    })
+    return Session.get('voteCount')
   },
-  memberCount() {
-    return Members.find().count()
-  },
-  teams() {
-    return Teams.find()
-  }
 })

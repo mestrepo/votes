@@ -5,6 +5,7 @@ import { ApolloServer } from 'apollo-server-express'
 
 import typeDefs from '../imports/api/schema'
 import resolvers from '../imports/api/resolvers'
+import '../imports/api/votes.js';
 
 const server = new ApolloServer({
   typeDefs,

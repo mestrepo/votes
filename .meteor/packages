@@ -21,3 +21,4 @@ autopublish@1.0.7             # Publish all data to the clients (for prototyping
 apollo
 twbs:bootstrap
 session
+meteorhacks:aggregate
